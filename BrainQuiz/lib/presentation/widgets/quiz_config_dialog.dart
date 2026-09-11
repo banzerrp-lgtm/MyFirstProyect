@@ -16,6 +16,7 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
   var cantidad = maximo < 10 ? maximo : 10;
   var conTiempo = false;
   var minutos = 15;
+  final dificultades = <String>{};
 
   return showDialog<QuizFiltro>(
     context: context,
@@ -33,10 +34,33 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
               max: maximo.toDouble(),
               divisions: maximo > 1 ? maximo - 1 : null,
               label: '$cantidad',
-              onChanged: (valor) =>
-                  setState(() => cantidad = valor.round()),
+              onChanged: (valor) => setState(() => cantidad = valor.round()),
             ),
             Text('$cantidad preguntas'),
+            const SizedBox(height: 12),
+            const Text('Dificultad (todas si no seleccionas ninguna):'),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final dificultad in const [
+                  ('facil', 'Fácil'),
+                  ('media', 'Media'),
+                  ('dificil', 'Difícil'),
+                ])
+                  FilterChip(
+                    label: Text(dificultad.$2),
+                    selected: dificultades.contains(dificultad.$1),
+                    onSelected: (seleccionada) => setState(() {
+                      if (seleccionada) {
+                        dificultades.add(dificultad.$1);
+                      } else {
+                        dificultades.remove(dificultad.$1);
+                      }
+                    }),
+                  ),
+              ],
+            ),
             const SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -75,6 +99,7 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
                 temaId: temaId,
                 materiaId: materiaId,
                 facultadId: facultadId,
+                dificultades: dificultades,
                 cantidadPreguntas: cantidad,
                 tiempoLimiteSegundos: conTiempo ? minutos * 60 : null,
                 tipo: tipo,

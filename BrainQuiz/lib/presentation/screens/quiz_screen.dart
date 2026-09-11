@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../logic/quiz_engine/quiz_engine_service.dart';
 import '../../logic/quiz_engine/quiz_models.dart';
 import '../providers/quiz_providers.dart';
+import 'quiz_resultado_screen.dart';
 
 /// Pantalla del quiz: recibe un filtro ya armado, inicia la sesión,
 /// gestiona el temporizador y delega toda la lógica al motor.
@@ -41,9 +42,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   void _onTick() {
     if (!mounted) return;
     if (widget.filtro.tiempoLimiteSegundos != null) {
-      setState(() => _segundosRestantes--);
+      setState(() {
+        _segundosRestantes = (_segundosRestantes - 1).clamp(0, 359999).toInt();
+      });
       if (_segundosRestantes <= 0) {
-        _finalizar(agotoTiempo: true);
+        _finalizar();
       }
     } else {
       setState(() {});
@@ -59,41 +62,29 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   int get _segundosTranscurridos => _cronometro.elapsed.inSeconds;
 
-  Future<void> _finalizar({bool agotoTiempo = false}) async {
+  Future<void> _finalizar() async {
     if (_finalizando) return;
     _finalizando = true;
     _ticker?.cancel();
     _cronometro.stop();
 
+    final limite = widget.filtro.tiempoLimiteSegundos;
+    final tiempoUsado = limite == null
+        ? _segundosTranscurridos
+        : _segundosTranscurridos.clamp(0, limite).toInt();
     final resultado = await ref
         .read(quizSessionProvider.notifier)
-        .finalizar(tiempoUsadoSegundos: _segundosTranscurridos);
+        .finalizar(tiempoUsadoSegundos: tiempoUsado);
 
     if (!mounted || resultado == null) return;
 
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(agotoTiempo ? 'Se acabó el tiempo' : 'Quiz finalizado'),
-        content: Text(
-          'Correctas: ${resultado.correctas}/${resultado.totalPreguntas}\n'
-          'Porcentaje: ${resultado.porcentaje.toStringAsFixed(1)}%\n'
-          'Sin responder: ${resultado.sinResponder}',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('Aceptar'),
-          ),
-        ],
+    ref.read(quizSessionProvider.notifier).limpiar();
+    if (!mounted) return;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => QuizResultadoScreen(resultado: resultado),
       ),
     );
-
-    ref.read(quizSessionProvider.notifier).limpiar();
   }
 
   Future<bool> _confirmarSalir() async {

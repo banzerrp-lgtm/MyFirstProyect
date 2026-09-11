@@ -22,6 +22,16 @@ class TemasScreen extends ConsumerWidget {
   ) async {
     final cantidadAsync = ref.read(cantidadPreguntasProvider(temaId));
     final maximo = cantidadAsync.hasValue ? cantidadAsync.requireValue : 50;
+    if (maximo == 0) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Este tema todavía no tiene preguntas.'),
+          ),
+        );
+      }
+      return;
+    }
     final filtro = await mostrarConfiguracionQuizDialog(
       context,
       tipo: 'practica_tema',
@@ -30,9 +40,8 @@ class TemasScreen extends ConsumerWidget {
     );
 
     if (filtro != null && context.mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => QuizScreen(filtro: filtro)),
-      );
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => QuizScreen(filtro: filtro)));
     }
   }
 
@@ -60,8 +69,9 @@ class TemasScreen extends ConsumerWidget {
                   title: Text(tema.nombre),
                   subtitle: Consumer(
                     builder: (context, ref, _) {
-                      final cantidad =
-                          ref.watch(cantidadPreguntasProvider(tema.id));
+                      final cantidad = ref.watch(
+                        cantidadPreguntasProvider(tema.id),
+                      );
                       return cantidad.when(
                         loading: () => const Text('...'),
                         error: (_, _) => const Text('—'),

@@ -10,12 +10,11 @@ class QuizSession {
     required List<PreguntaConOpciones> preguntas,
     required this.filtro,
     Random? random,
-  })  : preguntas = List.unmodifiable(
-          List<PreguntaConOpciones>.from(preguntas)
-            ..shuffle(random ?? Random()),
-        ),
-        _respuestas = {},
-        _pendientes = {};
+  }) : preguntas = List.unmodifiable(
+         List<PreguntaConOpciones>.from(preguntas)..shuffle(random ?? Random()),
+       ),
+       _respuestas = {},
+       _pendientes = {};
 
   final List<PreguntaConOpciones> preguntas;
   final QuizFiltro filtro;
@@ -36,6 +35,7 @@ class QuizSession {
   bool estaPendiente(int preguntaId) => _pendientes.contains(preguntaId);
 
   void responder(int opcionId) {
+    if (estado == EstadoSesion.finalizada) return;
     final pregunta = preguntaActual;
     final opcion = pregunta.opciones.firstWhere((o) => o.id == opcionId);
     _respuestas[pregunta.id] = RespuestaRegistrada(
@@ -46,22 +46,34 @@ class QuizSession {
     _pendientes.remove(pregunta.id);
   }
 
-  void marcarPendiente() => _pendientes.add(preguntaActual.id);
-  void desmarcarPendiente() => _pendientes.remove(preguntaActual.id);
+  void marcarPendiente() {
+    if (estado == EstadoSesion.enCurso) _pendientes.add(preguntaActual.id);
+  }
+
+  void desmarcarPendiente() {
+    if (estado == EstadoSesion.enCurso) _pendientes.remove(preguntaActual.id);
+  }
 
   void siguiente() {
-    if (!esUltima) _indiceActual++;
+    if (estado == EstadoSesion.enCurso && !esUltima) _indiceActual++;
   }
 
   void anterior() {
-    if (!esPrimera) _indiceActual--;
+    if (estado == EstadoSesion.enCurso && !esPrimera) _indiceActual--;
   }
 
   void irA(int indice) {
-    if (indice >= 0 && indice < preguntas.length) _indiceActual = indice;
+    if (estado == EstadoSesion.enCurso &&
+        indice >= 0 &&
+        indice < preguntas.length) {
+      _indiceActual = indice;
+    }
   }
 
   QuizResultado finalizar({required int tiempoUsadoSegundos}) {
+    if (estado == EstadoSesion.finalizada) {
+      throw StateError('La sesión ya fue finalizada.');
+    }
     estado = EstadoSesion.finalizada;
 
     final correctas = _respuestas.values.where((r) => r.esCorrecta).length;
@@ -71,13 +83,25 @@ class QuizSession {
     final sinResponder = preguntas.length - _respuestas.length;
 
     final porTema = <int, ({int correctas, int total})>{};
+    final porMateria = <int, ({int correctas, int total})>{};
     for (final pregunta in preguntas) {
       final actual = porTema[pregunta.temaId] ?? (correctas: 0, total: 0);
       final respuesta = _respuestas[pregunta.id];
       porTema[pregunta.temaId] = (
-        correctas: actual.correctas + ((respuesta?.esCorrecta ?? false) ? 1 : 0),
+        correctas:
+            actual.correctas + ((respuesta?.esCorrecta ?? false) ? 1 : 0),
         total: actual.total + 1,
       );
+      final materiaId = pregunta.materiaId;
+      if (materiaId != null) {
+        final materiaActual = porMateria[materiaId] ?? (correctas: 0, total: 0);
+        porMateria[materiaId] = (
+          correctas:
+              materiaActual.correctas +
+              ((respuesta?.esCorrecta ?? false) ? 1 : 0),
+          total: materiaActual.total + 1,
+        );
+      }
     }
 
     final respuestasCompletas = preguntas
@@ -100,6 +124,8 @@ class QuizSession {
       tiempoUsadoSegundos: tiempoUsadoSegundos,
       respuestas: respuestasCompletas,
       porTema: porTema,
+      porMateria: porMateria,
+      preguntas: preguntas,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/database.dart';
 import '../../data/repositories/contenido_repository.dart';
+import '../../logic/quiz_engine/quiz_models.dart';
 import 'database_provider.dart';
 
 final contenidoRepositoryProvider = Provider<ContenidoRepository>((ref) {
@@ -12,30 +13,52 @@ final facultadesProvider = StreamProvider<List<Facultade>>((ref) {
   return ref.watch(contenidoRepositoryProvider).watchFacultades();
 });
 
-final materiasProvider =
-    StreamProvider.family<List<Materia>, int>((ref, facultadId) {
+final materiaProvider = StreamProvider.family<Materia?, int>((ref, materiaId) {
+  return ref.watch(contenidoRepositoryProvider).watchMateria(materiaId);
+});
+
+final materiasProvider = StreamProvider.family<List<Materia>, int>((
+  ref,
+  facultadId,
+) {
   return ref.watch(contenidoRepositoryProvider).watchMaterias(facultadId);
+});
+
+final temaProvider = StreamProvider.family<Tema?, int>((ref, temaId) {
+  return ref.watch(contenidoRepositoryProvider).watchTema(temaId);
 });
 
 final temasProvider = StreamProvider.family<List<Tema>, int>((ref, materiaId) {
   return ref.watch(contenidoRepositoryProvider).watchTemas(materiaId);
 });
 
-final cantidadPreguntasProvider =
-    StreamProvider.family<int, int>((ref, temaId) {
+final cantidadPreguntasProvider = StreamProvider.family<int, int>((
+  ref,
+  temaId,
+) {
   return ref.watch(contenidoRepositoryProvider).watchCantidadPreguntas(temaId);
 });
 
-final cantidadPreguntasMateriaProvider =
-    StreamProvider.family<int, int>((ref, materiaId) {
+final cantidadPreguntasMateriaProvider = StreamProvider.family<int, int>((
+  ref,
+  materiaId,
+) {
   return ref
       .watch(contenidoRepositoryProvider)
       .watchCantidadPreguntasMateria(materiaId);
 });
 
-final cantidadPreguntasFacultadProvider =
-    StreamProvider.family<int, int>((ref, facultadId) {
+final cantidadPreguntasFacultadProvider = StreamProvider.family<int, int>((
+  ref,
+  facultadId,
+) {
   return ref
       .watch(contenidoRepositoryProvider)
       .watchCantidadPreguntasFacultad(facultadId);
 });
+
+final preguntasProvider = StreamProvider.family<List<PreguntaConOpciones>, int>(
+  (ref, temaId) {
+    return ref.watch(contenidoRepositoryProvider).watchPreguntas(temaId);
+  },
+);

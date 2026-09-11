@@ -5,6 +5,8 @@ import '../providers/contenido_providers.dart';
 import '../widgets/quiz_config_dialog.dart';
 import 'materias_screen.dart';
 import 'quiz_screen.dart';
+import 'progreso_screen.dart';
+import 'banco_preguntas_screen.dart';
 
 class InicioScreen extends ConsumerWidget {
   const InicioScreen({super.key});
@@ -48,7 +50,25 @@ class InicioScreen extends ConsumerWidget {
     final facultades = ref.watch(facultadesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('BrainQuiz')),
+      appBar: AppBar(
+        title: const Text('BrainQuiz'),
+        actions: [
+          IconButton(
+            tooltip: 'Mi progreso',
+            icon: const Icon(Icons.insights),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ProgresoScreen())),
+          ),
+          IconButton(
+            tooltip: 'Administrar banco de preguntas',
+            icon: const Icon(Icons.library_books_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const BancoPreguntasScreen()),
+            ),
+          ),
+        ],
+      ),
       body: facultades.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, st) => Center(child: Text('Error: $err')),

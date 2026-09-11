@@ -10,6 +10,10 @@ final quizRepositoryProvider = Provider<QuizRepository>((ref) {
   return QuizRepository(ref.watch(databaseProvider));
 });
 
+final progresoProvider = FutureProvider<ProgresoData>((ref) {
+  return ref.watch(quizRepositoryProvider).obtenerProgreso();
+});
+
 final quizEngineServiceProvider = Provider<QuizEngineService>((ref) {
   return QuizEngineService(ref.watch(quizRepositoryProvider));
 });
@@ -80,6 +84,7 @@ class QuizSessionNotifier extends Notifier<QuizUiState?> {
           tiempoUsadoSegundos: tiempoUsadoSegundos,
         );
 
+    ref.invalidate(progresoProvider);
     return resultado;
   }
 

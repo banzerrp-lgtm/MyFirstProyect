@@ -20,14 +20,14 @@ class QuizFiltro {
   });
 
   Map<String, dynamic> toJson() => {
-        'facultadId': facultadId,
-        'materiaId': materiaId,
-        'temaId': temaId,
-        'dificultades': dificultades.toList(),
-        'cantidadPreguntas': cantidadPreguntas,
-        'tiempoLimiteSegundos': tiempoLimiteSegundos,
-        'tipo': tipo,
-      };
+    'facultadId': facultadId,
+    'materiaId': materiaId,
+    'temaId': temaId,
+    'dificultades': dificultades.toList(),
+    'cantidadPreguntas': cantidadPreguntas,
+    'tiempoLimiteSegundos': tiempoLimiteSegundos,
+    'tipo': tipo,
+  };
 }
 
 class OpcionModel {
@@ -47,6 +47,9 @@ class OpcionModel {
 class PreguntaConOpciones {
   final int id;
   final int temaId;
+  final int? materiaId;
+  final String? temaNombre;
+  final String? materiaNombre;
   final String enunciado;
   final String? explicacion;
   final String dificultad;
@@ -55,6 +58,9 @@ class PreguntaConOpciones {
   const PreguntaConOpciones({
     required this.id,
     required this.temaId,
+    this.materiaId,
+    this.temaNombre,
+    this.materiaNombre,
     required this.enunciado,
     required this.explicacion,
     required this.dificultad,
@@ -82,6 +88,8 @@ class QuizResultado {
   final int tiempoUsadoSegundos;
   final List<RespuestaRegistrada> respuestas;
   final Map<int, ({int correctas, int total})> porTema;
+  final Map<int, ({int correctas, int total})> porMateria;
+  final List<PreguntaConOpciones> preguntas;
 
   const QuizResultado({
     required this.totalPreguntas,
@@ -91,6 +99,8 @@ class QuizResultado {
     required this.tiempoUsadoSegundos,
     required this.respuestas,
     required this.porTema,
+    this.porMateria = const {},
+    this.preguntas = const [],
   });
 
   double get porcentaje =>
