@@ -25,3 +25,17 @@ final cantidadPreguntasProvider =
     StreamProvider.family<int, int>((ref, temaId) {
   return ref.watch(contenidoRepositoryProvider).watchCantidadPreguntas(temaId);
 });
+
+final cantidadPreguntasMateriaProvider =
+    StreamProvider.family<int, int>((ref, materiaId) {
+  return ref
+      .watch(contenidoRepositoryProvider)
+      .watchCantidadPreguntasMateria(materiaId);
+});
+
+final cantidadPreguntasFacultadProvider =
+    StreamProvider.family<int, int>((ref, facultadId) {
+  return ref
+      .watch(contenidoRepositoryProvider)
+      .watchCantidadPreguntasFacultad(facultadId);
+});
