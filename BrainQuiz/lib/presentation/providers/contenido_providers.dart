@@ -9,56 +9,57 @@ final contenidoRepositoryProvider = Provider<ContenidoRepository>((ref) {
   return ContenidoRepository(ref.watch(databaseProvider));
 });
 
-final facultadesProvider = StreamProvider<List<Facultade>>((ref) {
+final facultadesProvider = StreamProvider.autoDispose<List<Facultade>>((ref) {
   return ref.watch(contenidoRepositoryProvider).watchFacultades();
 });
 
-final materiaProvider = StreamProvider.family<Materia?, int>((ref, materiaId) {
-  return ref.watch(contenidoRepositoryProvider).watchMateria(materiaId);
-});
+final materiaProvider = StreamProvider.autoDispose.family<Materia?, int>(
+  (ref, materiaId) {
+    return ref.watch(contenidoRepositoryProvider).watchMateria(materiaId);
+  },
+);
 
-final materiasProvider = StreamProvider.family<List<Materia>, int>((
-  ref,
-  facultadId,
-) {
-  return ref.watch(contenidoRepositoryProvider).watchMaterias(facultadId);
-});
+final materiasProvider = StreamProvider.autoDispose.family<List<Materia>, int>(
+  (ref, facultadId) {
+    return ref.watch(contenidoRepositoryProvider).watchMaterias(facultadId);
+  },
+);
 
-final temaProvider = StreamProvider.family<Tema?, int>((ref, temaId) {
-  return ref.watch(contenidoRepositoryProvider).watchTema(temaId);
-});
+final temaProvider = StreamProvider.autoDispose.family<Tema?, int>(
+  (ref, temaId) {
+    return ref.watch(contenidoRepositoryProvider).watchTema(temaId);
+  },
+);
 
-final temasProvider = StreamProvider.family<List<Tema>, int>((ref, materiaId) {
-  return ref.watch(contenidoRepositoryProvider).watchTemas(materiaId);
-});
+final temasProvider = StreamProvider.autoDispose.family<List<Tema>, int>(
+  (ref, materiaId) {
+    return ref.watch(contenidoRepositoryProvider).watchTemas(materiaId);
+  },
+);
 
-final cantidadPreguntasProvider = StreamProvider.family<int, int>((
-  ref,
-  temaId,
-) {
-  return ref.watch(contenidoRepositoryProvider).watchCantidadPreguntas(temaId);
-});
+final cantidadPreguntasProvider = StreamProvider.autoDispose.family<int, int>(
+  (ref, temaId) {
+    return ref.watch(contenidoRepositoryProvider).watchCantidadPreguntas(temaId);
+  },
+);
 
-final cantidadPreguntasMateriaProvider = StreamProvider.family<int, int>((
-  ref,
-  materiaId,
-) {
+final cantidadPreguntasMateriaProvider =
+    StreamProvider.autoDispose.family<int, int>((ref, materiaId) {
   return ref
       .watch(contenidoRepositoryProvider)
       .watchCantidadPreguntasMateria(materiaId);
 });
 
-final cantidadPreguntasFacultadProvider = StreamProvider.family<int, int>((
-  ref,
-  facultadId,
-) {
+final cantidadPreguntasFacultadProvider =
+    StreamProvider.autoDispose.family<int, int>((ref, facultadId) {
   return ref
       .watch(contenidoRepositoryProvider)
       .watchCantidadPreguntasFacultad(facultadId);
 });
 
-final preguntasProvider = StreamProvider.family<List<PreguntaConOpciones>, int>(
-  (ref, temaId) {
-    return ref.watch(contenidoRepositoryProvider).watchPreguntas(temaId);
-  },
-);
+final preguntasProvider = StreamProvider.autoDispose.family<
+  List<PreguntaConOpciones>,
+  int
+>((ref, temaId) {
+  return ref.watch(contenidoRepositoryProvider).watchPreguntas(temaId);
+});
