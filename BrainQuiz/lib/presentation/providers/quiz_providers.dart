@@ -47,6 +47,18 @@ class QuizSessionNotifier extends Notifier<QuizUiState?> {
     _actualizarEstado();
   }
 
+  void alternarPendiente() {
+    final session = _session;
+    if (session == null) return;
+    final id = session.preguntaActual.id;
+    if (session.estaPendiente(id)) {
+      session.desmarcarPendiente();
+    } else {
+      session.marcarPendiente();
+    }
+    _actualizarEstado();
+  }
+
   void irA(int indice) {
     _session?.irA(indice);
     _actualizarEstado();
