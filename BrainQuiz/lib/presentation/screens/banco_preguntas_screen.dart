@@ -509,6 +509,17 @@ class _PreguntaDialogState extends State<_PreguntaDialog> {
       );
       return;
     }
+
+    final textos = opciones.map((o) => o.texto.toLowerCase()).toList();
+    if (textos.toSet().length != textos.length) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hay opciones con el mismo texto.'),
+        ),
+      );
+      return;
+    }
+
     setState(() => _guardando = true);
     await widget.onGuardar(
       _enunciado.text.trim(),

@@ -42,9 +42,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   void _onTick() {
     if (!mounted) return;
     if (widget.filtro.tiempoLimiteSegundos != null) {
-      setState(() {
-        _segundosRestantes = (_segundosRestantes - 1).clamp(0, 359999).toInt();
-      });
+      final restante = widget.filtro.tiempoLimiteSegundos! -
+          _cronometro.elapsed.inSeconds;
+      setState(() => _segundosRestantes = restante.clamp(0, 359999));
       if (_segundosRestantes <= 0) {
         _finalizar();
       }

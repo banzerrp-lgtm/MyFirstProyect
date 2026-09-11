@@ -92,12 +92,22 @@ class QuizRepository {
     }
 
     final filas = await query.get();
-    final preguntas = filas.map((f) => f.readTable(_db.preguntas)).toList();
-    final materiaPorPregunta = <int, int>{
-      for (final fila in filas)
-        fila.readTable(_db.preguntas).id: fila.readTable(_db.materias).id,
-    };
-    if (preguntas.isEmpty) return [];
+    if (filas.isEmpty) return const [];
+
+    final preguntas = <Pregunta>[];
+    final materiaIdPorPregunta = <int, int>{};
+    final temaNombrePorPregunta = <int, String>{};
+    final materiaNombrePorPregunta = <int, String>{};
+
+    for (final fila in filas) {
+      final pregunta = fila.readTable(_db.preguntas);
+      final tema = fila.readTable(_db.temas);
+      final materia = fila.readTable(_db.materias);
+      preguntas.add(pregunta);
+      materiaIdPorPregunta[pregunta.id] = materia.id;
+      temaNombrePorPregunta[pregunta.id] = tema.nombre;
+      materiaNombrePorPregunta[pregunta.id] = materia.nombre;
+    }
 
     final ids = preguntas.map((pregunta) => pregunta.id).toList();
     final opcionesQuery = _db.select(_db.opciones)
@@ -105,38 +115,29 @@ class QuizRepository {
       ..orderBy([(opcion) => OrderingTerm.asc(opcion.orden)]);
     final opciones = await opcionesQuery.get();
 
+    final opcionesPorPregunta = <int, List<OpcionModel>>{};
+    for (final opcion in opciones) {
+      opcionesPorPregunta.putIfAbsent(opcion.preguntaId, () => []).add(
+        OpcionModel(
+          id: opcion.id,
+          texto: opcion.texto,
+          esCorrecta: opcion.esCorrecta,
+          orden: opcion.orden,
+        ),
+      );
+    }
+
     return preguntas.map((pregunta) {
-      final ops = opciones
-          .where((opcion) => opcion.preguntaId == pregunta.id)
-          .map(
-            (opcion) => OpcionModel(
-              id: opcion.id,
-              texto: opcion.texto,
-              esCorrecta: opcion.esCorrecta,
-              orden: opcion.orden,
-            ),
-          )
-          .toList();
       return PreguntaConOpciones(
         id: pregunta.id,
         temaId: pregunta.temaId,
-        materiaId: materiaPorPregunta[pregunta.id],
-        temaNombre: filas
-            .firstWhere(
-              (fila) => fila.readTable(_db.preguntas).id == pregunta.id,
-            )
-            .readTable(_db.temas)
-            .nombre,
-        materiaNombre: filas
-            .firstWhere(
-              (fila) => fila.readTable(_db.preguntas).id == pregunta.id,
-            )
-            .readTable(_db.materias)
-            .nombre,
+        materiaId: materiaIdPorPregunta[pregunta.id],
+        temaNombre: temaNombrePorPregunta[pregunta.id],
+        materiaNombre: materiaNombrePorPregunta[pregunta.id],
         enunciado: pregunta.enunciado,
         explicacion: pregunta.explicacion,
         dificultad: pregunta.dificultad,
-        opciones: ops,
+        opciones: opcionesPorPregunta[pregunta.id] ?? const [],
       );
     }).toList();
   }

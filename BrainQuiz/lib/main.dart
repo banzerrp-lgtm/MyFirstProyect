@@ -15,7 +15,15 @@ class BrainQuizApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'BrainQuiz',
-      theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
+      theme: ThemeData(
+        colorSchemeSeed: Colors.teal,
+        useMaterial3: true,
+        cardTheme: const CardThemeData(
+          elevation: 2,
+          margin: EdgeInsets.symmetric(vertical: 6),
+        ),
+        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+      ),
       home: const _StartupGate(),
     );
   }

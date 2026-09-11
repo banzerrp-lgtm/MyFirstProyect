@@ -72,37 +72,41 @@ class ContenidoRepository {
       )..where((m) => m.id.equals(tema.materiaId))).getSingleOrNull();
       if (materia == null) return const <PreguntaConOpciones>[];
 
-      final result = <PreguntaConOpciones>[];
-      for (final pregunta in preguntas) {
-        final opciones =
-            await (_db.select(_db.opciones)
-                  ..where((o) => o.preguntaId.equals(pregunta.id))
-                  ..orderBy([(o) => OrderingTerm.asc(o.orden)]))
-                .get();
-        result.add(
-          PreguntaConOpciones(
-            id: pregunta.id,
-            temaId: pregunta.temaId,
-            materiaId: materia.id,
-            temaNombre: tema.nombre,
-            materiaNombre: materia.nombre,
-            enunciado: pregunta.enunciado,
-            explicacion: pregunta.explicacion,
-            dificultad: pregunta.dificultad,
-            opciones: opciones
-                .map(
-                  (o) => OpcionModel(
-                    id: o.id,
-                    texto: o.texto,
-                    esCorrecta: o.esCorrecta,
-                    orden: o.orden,
-                  ),
-                )
-                .toList(),
+      if (preguntas.isEmpty) return const <PreguntaConOpciones>[];
+
+      final ids = preguntas.map((p) => p.id).toList();
+      final todasOpciones = await (_db.select(_db.opciones)
+            ..where((o) => o.preguntaId.isIn(ids))
+            ..orderBy([(o) => OrderingTerm.asc(o.orden)]))
+          .get();
+
+      final opcionesPorPregunta = <int, List<OpcionModel>>{};
+      for (final o in todasOpciones) {
+        opcionesPorPregunta.putIfAbsent(o.preguntaId, () => []).add(
+          OpcionModel(
+            id: o.id,
+            texto: o.texto,
+            esCorrecta: o.esCorrecta,
+            orden: o.orden,
           ),
         );
       }
-      return result;
+
+      return preguntas
+          .map(
+            (pregunta) => PreguntaConOpciones(
+              id: pregunta.id,
+              temaId: pregunta.temaId,
+              materiaId: materia.id,
+              temaNombre: tema.nombre,
+              materiaNombre: materia.nombre,
+              enunciado: pregunta.enunciado,
+              explicacion: pregunta.explicacion,
+              dificultad: pregunta.dificultad,
+              opciones: opcionesPorPregunta[pregunta.id] ?? const [],
+            ),
+          )
+          .toList();
     });
   }
 

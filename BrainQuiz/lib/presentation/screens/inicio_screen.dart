@@ -7,6 +7,8 @@ import 'materias_screen.dart';
 import 'quiz_screen.dart';
 import 'progreso_screen.dart';
 import 'banco_preguntas_screen.dart';
+import 'import_export_screen.dart';
+import 'prompt_generator_screen.dart';
 
 class InicioScreen extends ConsumerWidget {
   const InicioScreen({super.key});
@@ -65,6 +67,20 @@ class InicioScreen extends ConsumerWidget {
             icon: const Icon(Icons.library_books_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const BancoPreguntasScreen()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Importar y exportar contenido',
+            icon: const Icon(Icons.import_export),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ImportExportScreen()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Generador de prompts para IA',
+            icon: const Icon(Icons.smart_toy_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PromptGeneratorScreen()),
             ),
           ),
         ],

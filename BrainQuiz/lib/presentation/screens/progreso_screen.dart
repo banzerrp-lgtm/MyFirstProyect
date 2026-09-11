@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/quiz_repository.dart';
+import '../../logic/stats/recommendation_service.dart';
 import '../providers/quiz_providers.dart';
 
 class ProgresoScreen extends ConsumerWidget {
@@ -51,10 +52,20 @@ class _ContenidoProgreso extends StatelessWidget {
         ),
       );
     }
+    final recomendaciones = const RecommendationService().buildRecommendations(
+      data,
+    );
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _ResumenCard(data: data),
+        const SizedBox(height: 16),
+        const Text('Recomendaciones', style: _sectionStyle),
+        const SizedBox(height: 8),
+        ...recomendaciones.map(
+          (recomendacion) => _RecommendationTile(recomendacion: recomendacion),
+        ),
         const SizedBox(height: 16),
         if (data.puntosEvolucion.length > 1) ...[
           const Text('Evolución', style: _sectionStyle),
@@ -143,6 +154,47 @@ class _Dato extends StatelessWidget {
       Text(label),
     ],
   );
+}
+
+class _RecommendationTile extends StatelessWidget {
+  const _RecommendationTile({required this.recomendacion});
+  final Recommendation recomendacion;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (recomendacion.priority) {
+      'Alta' => Colors.red,
+      'Media' => Colors.orange,
+      _ => Colors.green,
+    };
+
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withAlpha(26),
+          foregroundColor: color,
+          child: Icon(recomendacion.icon),
+        ),
+        title: Text(recomendacion.title),
+        subtitle: Text(recomendacion.description),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withAlpha(26),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            recomendacion.priority,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Grafico extends StatelessWidget {
