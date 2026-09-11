@@ -1,0 +1,112 @@
+🦷 CONTEXTO DEL PROYECTO — Léeme antes de ayudar con código
+
+Este documento resume todo el proyecto. Úsalo como contexto (por ejemplo #file:contexto-proyecto-para-ia.md en GitHub Copilot Chat) antes de pedir cualquier tarea de código, para no tener que re-explicar el proyecto en cada sesión.
+
+1. Qué es el proyecto
+
+App de preparación y simulación de examen de admisión de Odontología. Desarrollada en Flutter para generar:
+
+APK para Android
+Aplicación de escritorio para Windows
+
+Funciona completamente offline (sin internet), con un banco de preguntas local que se puede importar/exportar.
+
+2. Estructura académica (jerarquía fija)
+Facultad → Materias → Temas → Preguntas → Opciones
+
+Ejemplo:
+
+Facultad: Examen de admisión de Odontología
+  Materia: Biología
+    Tema: Citología
+      Pregunta: "¿Cuál es la unidad básica de los seres vivos?"
+        Opciones: A) Tejido  B) Célula ✅  C) Órgano  D) Sistema
+Las materias y temas son configurables (se pueden agregar/editar/eliminar), no están fijas en el código.
+Las preguntas tienen número variable de opciones (3, 4, 5, 6+), con letras generadas automáticamente.
+Cada pregunta tiene dificultad: Fácil / Media / Difícil.
+Las preguntas siempre se presentan en orden aleatorio.
+3. Decisiones técnicas ya tomadas (no las cuestiones, ya están decididas)
+Decisión	Elección	Por qué
+Framework	Flutter	Un solo código → Android + Windows
+Base de datos local	Drift (sobre SQLite)	Rápido con miles de preguntas, consultas SQL tipadas, ideal para filtros combinados (materia+tema+dificultad)
+Gestión de estado	Riverpod	Rendimiento, menos código repetitivo, se integra bien con streams de Drift
+Compresión de archivos	paquete archive	Para exportar/importar sin que el usuario tenga que saber qué es un .zip — la app lo maneja internamente con extensión propia (ej. .odontobank)
+Sincronización entre dispositivos	NINGUNA	Cada instalación (PC, Android) es independiente. Todo se mueve manualmente vía export/import
+Selector de archivos	file_picker	
+Rutas de almacenamiento	path_provider	
+Gráficos de estadísticas	fl_chart	
+4. Motor central del quiz (pieza más importante)
+
+Un solo motor para los 3 modos (práctica por tema, práctica por materia, simulacro general). Nunca crear lógica separada por modo.
+
+El motor recibe filtros → devuelve preguntas:
+
+Recibe filtros (materia, tema, dificultad, cantidad, tiempo).
+Busca preguntas compatibles en la base de datos.
+Verifica que existan suficientes.
+Selecciona la cantidad pedida.
+Aleatoriza el orden.
+Presenta una por una (con temporizador, opción de marcar pregunta pendiente).
+Registra cada respuesta.
+Corrige al finalizar.
+Calcula resultado (% general, por materia, por tema).
+Guarda el intento en el historial.
+5. Sistema de importación / exportación (dos tipos distintos)
+
+A) Exportación de contenido (por niveles, sin datos personales):
+
+Nivel 1: un Tema completo
+Nivel 2: una Materia completa (con sus temas y preguntas)
+Nivel 3: una Facultad completa
+
+B) Backup completo del usuario (para mover TODO de una instalación a otra):
+
+Todo el contenido (A) + historial de intentos + estadísticas + errores + quizzes guardados.
+
+Ambos se generan como un solo archivo (internamente un zip vía archive, con extensión propia). Antes de importar, la app muestra un resumen ("detectado: 6 materias, 42 temas, 1850 preguntas") y maneja duplicados (agregar / reemplazar / omitir / cancelar).
+
+6. Esquema de base de datos (Drift)
+Facultades (id, nombre)
+Materias   (id, facultad_id, nombre)
+Temas      (id, materia_id, nombre)
+Preguntas  (id, tema_id, enunciado, explicacion, dificultad)
+Opciones   (id, pregunta_id, texto, es_correcta, orden)
+
+Intentos          (id, fecha, tipo, config_json, correctas, incorrectas, tiempo_usado)
+RespuestasIntento (id, intento_id, pregunta_id, opcion_elegida_id, es_correcta)
+QuizzesGuardados  (id, nombre, config_json)
+
+Índices en Preguntas.tema_id y Preguntas.dificultad.
+
+7. Estructura de carpetas
+lib/
+├── data/
+│   ├── database/       → tablas Drift
+│   ├── models/          → clases de datos
+│   └── repositories/     → funciones que leen/escriben en la BD
+├── logic/
+│   ├── quiz_engine/      → motor central
+│   ├── stats/            → estadísticas y recomendaciones
+│   └── import_export/    → backup y exportación por niveles
+├── presentation/
+│   ├── screens/
+│   ├── widgets/
+│   └── providers/        → Riverpod
+└── main.dart
+8. Orden de construcción (fases)
+Cimientos — proyecto Flutter + tablas Drift + datos de prueba en código
+Estructura y navegación — pantallas Inicio/Materias/Temas (solo lectura)
+Motor de quiz — filtros → preguntas aleatorias → pantalla de quiz completa
+Resultados y revisión — % por materia/tema, revisión pregunta por pregunta
+Progreso — Mis errores, historial, gráficos de evolución
+Administración del banco — CRUD manual de preguntas
+Importación/exportación — los dos tipos descritos en la sección 5
+Generador de prompts para IA — pantalla que arma un prompt para copiar a otra IA externa (sin conexión directa a ninguna API)
+Recomendaciones y pulido final — builds finales (flutter build apk, flutter build windows)
+
+El motor (fase 2) se construye antes que administración/import-export a propósito: todo lo demás alimenta o consume ese mismo motor.
+
+9. Cómo pedir ayuda de código usando este contexto
+Trabajar una fase, un archivo a la vez — nunca pedir "la app completa".
+Referenciar siempre este documento al iniciar una tarea nueva.
+Especificar la ruta exacta del archivo destino en cada prompt.
