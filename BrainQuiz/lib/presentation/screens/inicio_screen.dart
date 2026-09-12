@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/contenido_providers.dart';
+import '../widgets/nombre_dialog.dart';
 import '../widgets/quiz_config_dialog.dart';
 import 'materias_screen.dart';
 import 'quiz_screen.dart';
@@ -47,6 +48,16 @@ class InicioScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _crearFacultad(BuildContext context, WidgetRef ref) async {
+    final nombre = await mostrarDialogoNombre(
+      context,
+      titulo: 'Nueva facultad',
+      labelCampo: 'Nombre de la facultad',
+    );
+    if (nombre == null || !context.mounted) return;
+    await ref.read(contenidoRepositoryProvider).crearFacultad(nombre: nombre);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final facultades = ref.watch(facultadesProvider);
@@ -84,6 +95,11 @@ class InicioScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _crearFacultad(context, ref),
+        icon: const Icon(Icons.add),
+        label: const Text('Facultad'),
       ),
       body: facultades.when(
         loading: () => const Center(child: CircularProgressIndicator()),

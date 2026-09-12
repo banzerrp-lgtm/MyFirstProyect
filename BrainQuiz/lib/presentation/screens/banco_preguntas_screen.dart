@@ -94,7 +94,14 @@ class _BancoPreguntasScreenState extends ConsumerState<BancoPreguntasScreen> {
                 width: 260,
                 child: DropdownButtonFormField<int>(
                   initialValue: facultadId,
-                  decoration: const InputDecoration(labelText: 'Facultad'),
+                  decoration: InputDecoration(
+                    labelText: 'Facultad',
+                    suffixIcon: IconButton(
+                      tooltip: 'Administrar facultades',
+                      icon: const Icon(Icons.edit_note),
+                      onPressed: () => _administrarFacultades(facultades),
+                    ),
+                  ),
                   items: facultades
                       .map(
                         (f) => DropdownMenuItem(
@@ -224,6 +231,22 @@ class _BancoPreguntasScreenState extends ConsumerState<BancoPreguntasScreen> {
     'dificil' => 'Difícil',
     _ => 'Media',
   };
+
+  Future<void> _administrarFacultades(List<Facultade> facultades) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _NombreListaDialog(
+        titulo: 'Facultades',
+        elementos: facultades.map((f) => (f.id, f.nombre)).toList(),
+        onCrear: (nombre) => _repo.crearFacultad(nombre: nombre),
+        onEditar: _repo.actualizarFacultad,
+        onEliminar: (id) => _confirmarEliminacion(
+          '¿Eliminar la facultad y todo su contenido?\nSe perderán materias, temas y preguntas asociadas.',
+          () => _repo.eliminarFacultad(id),
+        ),
+      ),
+    );
+  }
 
   Future<void> _administrarMaterias(List<Materia> materias) async {
     if (_facultadId == null) return;

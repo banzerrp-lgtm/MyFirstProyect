@@ -110,6 +110,20 @@ class ContenidoRepository {
     });
   }
 
+  Future<int> crearFacultad({required String nombre}) => _db
+      .into(_db.facultades)
+      .insert(FacultadesCompanion.insert(nombre: nombre));
+
+  Future<void> actualizarFacultad(int id, String nombre) async {
+    await (_db.update(_db.facultades)..where((f) => f.id.equals(id))).write(
+      FacultadesCompanion(nombre: Value(nombre)),
+    );
+  }
+
+  Future<void> eliminarFacultad(int id) async {
+    await (_db.delete(_db.facultades)..where((f) => f.id.equals(id))).go();
+  }
+
   Future<int> crearMateria({required int facultadId, required String nombre}) =>
       _db
           .into(_db.materias)
