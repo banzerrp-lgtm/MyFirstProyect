@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/theme/app_theme.dart';
 import 'presentation/providers/database_provider.dart';
 import 'presentation/screens/inicio_screen.dart';
 
@@ -15,15 +16,9 @@ class BrainQuizApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'BrainQuiz',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.teal,
-        useMaterial3: true,
-        cardTheme: const CardThemeData(
-          elevation: 2,
-          margin: EdgeInsets.symmetric(vertical: 6),
-        ),
-        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       home: const _StartupGate(),
     );
   }
