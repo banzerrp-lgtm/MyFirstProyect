@@ -64,10 +64,12 @@ class TemasScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final tema = lista[i];
               return Card(
+                key: ValueKey('tema-${tema.id}'),
                 child: ListTile(
                   leading: const Icon(Icons.topic),
                   title: Text(tema.nombre),
                   subtitle: Consumer(
+                    key: ValueKey('cantidad-tema-${tema.id}'),
                     builder: (context, ref, _) {
                       final cantidad = ref.watch(
                         cantidadPreguntasProvider(tema.id),

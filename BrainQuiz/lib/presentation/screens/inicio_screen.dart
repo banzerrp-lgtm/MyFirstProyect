@@ -55,7 +55,15 @@ class InicioScreen extends ConsumerWidget {
       labelCampo: 'Nombre de la facultad',
     );
     if (nombre == null || !context.mounted) return;
-    await ref.read(contenidoRepositoryProvider).crearFacultad(nombre: nombre);
+    try {
+      await ref.read(contenidoRepositoryProvider).crearFacultad(nombre: nombre);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo crear la facultad: $error')),
+        );
+      }
+    }
   }
 
   @override
@@ -114,6 +122,7 @@ class InicioScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final facultad = lista[i];
               return Card(
+                key: ValueKey('facultad-${facultad.id}'),
                 child: ListTile(
                   leading: const Icon(Icons.school),
                   title: Text(facultad.nombre),

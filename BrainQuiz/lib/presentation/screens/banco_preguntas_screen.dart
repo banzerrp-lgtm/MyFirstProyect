@@ -188,8 +188,13 @@ class _BancoPreguntasScreenState extends ConsumerState<BancoPreguntasScreen> {
                           : ListView.builder(
                               padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
                               itemCount: preguntas.length,
-                              itemBuilder: (_, i) =>
-                                  _tarjetaPregunta(preguntas[i]),
+                              itemBuilder: (_, i) {
+                                final pregunta = preguntas[i];
+                                return KeyedSubtree(
+                                  key: ValueKey('pregunta-${pregunta.id}'),
+                                  child: _tarjetaPregunta(pregunta),
+                                );
+                              },
                             ),
                     ),
         ),

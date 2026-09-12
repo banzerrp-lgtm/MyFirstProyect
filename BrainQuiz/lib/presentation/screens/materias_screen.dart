@@ -71,10 +71,12 @@ class MateriasScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final materia = lista[i];
               return Card(
+                key: ValueKey('materia-${materia.id}'),
                 child: ListTile(
                   leading: const Icon(Icons.menu_book),
                   title: Text(materia.nombre),
                   subtitle: Consumer(
+                    key: ValueKey('cantidad-materia-${materia.id}'),
                     builder: (context, ref, _) {
                       final cantidad = ref.watch(
                         cantidadPreguntasMateriaProvider(materia.id),
