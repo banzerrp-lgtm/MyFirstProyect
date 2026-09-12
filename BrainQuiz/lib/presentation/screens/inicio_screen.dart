@@ -5,7 +5,7 @@ import '../../core/theme/app_spacing.dart';
 import '../providers/contenido_providers.dart';
 import '../widgets/app_ui_kit.dart';
 import '../widgets/nombre_dialog.dart';
-import '../widgets/quiz_config_dialog.dart';
+import '../widgets/simulacro_config_dialog.dart';
 import 'ai_import_screen.dart';
 import 'banco_preguntas_screen.dart';
 import 'import_export_screen.dart';
@@ -35,12 +35,10 @@ class InicioScreen extends ConsumerWidget {
       );
       return;
     }
-    final filtro = await mostrarConfiguracionQuizDialog(
+    final filtro = await mostrarConfiguracionSimulacroDialog(
       context,
-      tipo: 'simulacro',
       facultadId: facultadId,
-      maximoDisponible: maximo,
-      tituloDialogo: 'Simulacro: $facultadNombre',
+      facultadNombre: facultadNombre,
     );
     if (filtro != null && context.mounted) {
       Navigator.of(context).push(

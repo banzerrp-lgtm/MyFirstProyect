@@ -1,5 +1,30 @@
 // Modelos de dominio del motor de quiz (independientes de Drift/Flutter).
 
+class DistribucionItem {
+  const DistribucionItem({
+    required this.materiaId,
+    this.temaId,
+    required this.cantidad,
+  });
+
+  final int materiaId;
+  final int? temaId;
+  final int cantidad;
+
+  Map<String, dynamic> toJson() => {
+    'materiaId': materiaId,
+    'temaId': temaId,
+    'cantidad': cantidad,
+  };
+
+  factory DistribucionItem.fromJson(Map<String, dynamic> json) =>
+      DistribucionItem(
+        materiaId: json['materiaId'] as int,
+        temaId: json['temaId'] as int?,
+        cantidad: json['cantidad'] as int,
+      );
+}
+
 class QuizFiltro {
   final int? facultadId;
   final int? materiaId;
@@ -8,6 +33,7 @@ class QuizFiltro {
   final int cantidadPreguntas;
   final int? tiempoLimiteSegundos;
   final String tipo;
+  final List<DistribucionItem> distribucion;
 
   const QuizFiltro({
     this.facultadId,
@@ -17,7 +43,10 @@ class QuizFiltro {
     required this.cantidadPreguntas,
     this.tiempoLimiteSegundos,
     required this.tipo,
+    this.distribucion = const [],
   });
+
+  bool get tieneDistribucion => distribucion.isNotEmpty;
 
   Map<String, dynamic> toJson() => {
     'facultadId': facultadId,
@@ -27,6 +56,7 @@ class QuizFiltro {
     'cantidadPreguntas': cantidadPreguntas,
     'tiempoLimiteSegundos': tiempoLimiteSegundos,
     'tipo': tipo,
+    'distribucion': distribucion.map((item) => item.toJson()).toList(),
   };
 }
 

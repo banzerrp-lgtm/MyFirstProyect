@@ -27,7 +27,7 @@ class QuizSessionNotifier extends Notifier<QuizUiState?> {
 
   Future<void> iniciar(QuizFiltro filtro) async {
     final service = ref.read(quizEngineServiceProvider);
-    _session = await service.iniciarSesion(filtro);
+    _session = await service.iniciarSesionDistribuida(filtro);
     _actualizarEstado();
   }
 
