@@ -66,6 +66,53 @@ class InicioScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _editarFacultad(
+      BuildContext context,
+      WidgetRef ref,
+      int id,
+      String nombreActual,
+    ) async {
+      final nombre = await mostrarDialogoNombre(
+        context,
+        titulo: 'Editar facultad',
+        inicial: nombreActual,
+        labelCampo: 'Nombre de la facultad',
+      );
+      if (nombre == null || !context.mounted) return;
+      try {
+        await ref.read(contenidoRepositoryProvider).actualizarFacultad(id, nombre);
+      } catch (error) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No se pudo editar la facultad: $error')),
+          );
+        }
+      }
+    }
+
+  Future<void> _eliminarFacultad(
+      BuildContext context,
+      WidgetRef ref,
+      int id,
+      String nombre,
+    ) async {
+      final ok = await confirmarEliminacion(
+        context,
+        mensaje:
+            '¿Eliminar "$nombre" y todo su contenido?\nSe perderán sus materias, temas y preguntas.',
+      );
+      if (!ok || !context.mounted) return;
+      try {
+        await ref.read(contenidoRepositoryProvider).eliminarFacultad(id);
+      } catch (error) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No se pudo eliminar la facultad: $error')),
+          );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final facultades = ref.watch(facultadesProvider);
@@ -133,6 +180,26 @@ class InicioScreen extends ConsumerWidget {
                         tooltip: 'Simulacro general',
                         icon: const Icon(Icons.timer_outlined),
                         onPressed: () => _iniciarSimulacro(
+                          context,
+                          ref,
+                          facultad.id,
+                          facultad.nombre,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Editar nombre',
+                        icon: const Icon(Icons.edit_outlined),
+                        onPressed: () => _editarFacultad(
+                          context,
+                          ref,
+                          facultad.id,
+                          facultad.nombre,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Eliminar facultad',
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _eliminarFacultad(
                           context,
                           ref,
                           facultad.id,

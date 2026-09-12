@@ -5,6 +5,7 @@ import '../../data/database/database.dart';
 import '../../data/repositories/contenido_repository.dart';
 import '../../logic/quiz_engine/quiz_models.dart';
 import '../providers/contenido_providers.dart';
+import '../widgets/nombre_dialog.dart';
 
 class BancoPreguntasScreen extends ConsumerStatefulWidget {
   const BancoPreguntasScreen({super.key});
@@ -374,43 +375,13 @@ class _NombreListaDialog extends StatefulWidget {
 
 class _NombreListaDialogState extends State<_NombreListaDialog> {
   Future<void> _nombre({int? id, String inicial = ''}) async {
-    final controller = TextEditingController(text: inicial);
-    final formKey = GlobalKey<FormState>();
-    final nombre = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          id == null
-              ? 'Nuevo ${widget.titulo.substring(0, widget.titulo.length - 1)}'
-              : 'Editar',
-        ),
-        content: Form(
-          key: formKey,
-          child: TextFormField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(labelText: 'Nombre'),
-            validator: (v) =>
-                v == null || v.trim().isEmpty ? 'Escribe un nombre' : null,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.pop(context, controller.text.trim());
-              }
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
+    final nombre = await mostrarDialogoNombre(
+      context,
+      titulo: id == null
+          ? 'Nueva ${widget.titulo.substring(0, widget.titulo.length - 1)}'
+          : 'Editar',
+      inicial: inicial,
     );
-    controller.dispose();
     if (nombre != null) {
       if (id == null) {
         await widget.onCrear(nombre);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/contenido_providers.dart';
+import '../widgets/nombre_dialog.dart';
 import '../widgets/quiz_config_dialog.dart';
 import 'quiz_screen.dart';
 import 'temas_screen.dart';
@@ -50,12 +51,83 @@ class MateriasScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _crearMateria(BuildContext context, WidgetRef ref) async {
+    final nombre = await mostrarDialogoNombre(
+      context,
+      titulo: 'Nueva materia',
+      labelCampo: 'Nombre de la materia',
+    );
+    if (nombre == null || !context.mounted) return;
+    try {
+      await ref
+          .read(contenidoRepositoryProvider)
+          .crearMateria(facultadId: facultadId, nombre: nombre);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo crear la materia: $error')),
+        );
+      }
+    }
+  }
+
+  Future<void> _editarMateria(
+    BuildContext context,
+    WidgetRef ref,
+    int id,
+    String nombreActual,
+  ) async {
+    final nombre = await mostrarDialogoNombre(
+      context,
+      titulo: 'Editar materia',
+      inicial: nombreActual,
+      labelCampo: 'Nombre de la materia',
+    );
+    if (nombre == null || !context.mounted) return;
+    try {
+      await ref.read(contenidoRepositoryProvider).actualizarMateria(id, nombre);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo editar la materia: $error')),
+        );
+      }
+    }
+  }
+
+  Future<void> _eliminarMateria(
+    BuildContext context,
+    WidgetRef ref,
+    int id,
+    String nombre,
+  ) async {
+    final ok = await confirmarEliminacion(
+      context,
+      mensaje: '¿Eliminar "$nombre" y todos sus temas y preguntas?',
+    );
+    if (!ok || !context.mounted) return;
+    try {
+      await ref.read(contenidoRepositoryProvider).eliminarMateria(id);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo eliminar la materia: $error')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final materias = ref.watch(materiasProvider(facultadId));
 
     return Scaffold(
       appBar: AppBar(title: Text(facultadNombre)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _crearMateria(context, ref),
+        icon: const Icon(Icons.add),
+        label: const Text('Materia'),
+      ),
       body: materias.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, st) => Center(child: Text('Error: $err')),
@@ -95,6 +167,26 @@ class MateriasScreen extends ConsumerWidget {
                         tooltip: 'Practicar toda la materia',
                         icon: const Icon(Icons.play_circle_outline),
                         onPressed: () => _practicarMateria(
+                          context,
+                          ref,
+                          materia.id,
+                          materia.nombre,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Editar nombre',
+                        icon: const Icon(Icons.edit_outlined),
+                        onPressed: () => _editarMateria(
+                          context,
+                          ref,
+                          materia.id,
+                          materia.nombre,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Eliminar materia',
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _eliminarMateria(
                           context,
                           ref,
                           materia.id,

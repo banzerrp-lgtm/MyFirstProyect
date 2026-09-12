@@ -5,27 +5,64 @@ Future<String?> mostrarDialogoNombre(
   required String titulo,
   String inicial = '',
   String labelCampo = 'Nombre',
-}) async {
-  final controller = TextEditingController(text: inicial);
-  final formKey = GlobalKey<FormState>();
-  final resultado = await showDialog<String>(
+}) {
+  return showDialog<String>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(titulo),
+    builder: (context) => _NombreDialog(
+      titulo: titulo,
+      inicial: inicial,
+      labelCampo: labelCampo,
+    ),
+  );
+}
+
+class _NombreDialog extends StatefulWidget {
+  const _NombreDialog({
+    required this.titulo,
+    required this.inicial,
+    required this.labelCampo,
+  });
+
+  final String titulo;
+  final String inicial;
+  final String labelCampo;
+
+  @override
+  State<_NombreDialog> createState() => _NombreDialogState();
+}
+
+class _NombreDialogState extends State<_NombreDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.inicial,
+  );
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _guardar() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.pop(context, _controller.text.trim());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.titulo),
       content: Form(
-        key: formKey,
+        key: _formKey,
         child: TextFormField(
-          controller: controller,
+          controller: _controller,
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(labelText: labelCampo),
+          decoration: InputDecoration(labelText: widget.labelCampo),
           validator: (v) =>
               v == null || v.trim().isEmpty ? 'Escribe un nombre' : null,
-          onFieldSubmitted: (_) {
-            if (formKey.currentState!.validate()) {
-              Navigator.pop(context, controller.text.trim());
-            }
-          },
+          onFieldSubmitted: (_) => _guardar(),
         ),
       ),
       actions: [
@@ -33,19 +70,10 @@ Future<String?> mostrarDialogoNombre(
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
-        FilledButton(
-          onPressed: () {
-            if (formKey.currentState!.validate()) {
-              Navigator.pop(context, controller.text.trim());
-            }
-          },
-          child: const Text('Guardar'),
-        ),
+        FilledButton(onPressed: _guardar, child: const Text('Guardar')),
       ],
-    ),
-  );
-  controller.dispose();
-  return resultado;
+    );
+  }
 }
 
 Future<bool> confirmarEliminacion(
