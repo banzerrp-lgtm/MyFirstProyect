@@ -10,6 +10,7 @@ import 'progreso_screen.dart';
 import 'banco_preguntas_screen.dart';
 import 'import_export_screen.dart';
 import 'prompt_generator_screen.dart';
+import 'ai_import_screen.dart';
 
 class InicioScreen extends ConsumerWidget {
   const InicioScreen({super.key});
@@ -147,6 +148,13 @@ class InicioScreen extends ConsumerWidget {
             icon: const Icon(Icons.smart_toy_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PromptGeneratorScreen()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Importar preguntas de IA',
+            icon: const Icon(Icons.file_download_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AiImportScreen()),
             ),
           ),
         ],

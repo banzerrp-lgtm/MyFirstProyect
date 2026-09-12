@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/repositories/contenido_repository.dart';
 import '../../logic/import_export/content_transfer_service.dart';
+import '../../logic/ai_prompt/ai_quiz_import_service.dart';
 import '../../logic/quiz_engine/quiz_models.dart';
 import 'database_provider.dart';
 
@@ -12,6 +13,10 @@ final contenidoRepositoryProvider = Provider<ContenidoRepository>((ref) {
 
 final contentTransferServiceProvider = Provider<ContentTransferService>((ref) {
   return ContentTransferService(ref.watch(databaseProvider));
+});
+
+final aiQuizImportServiceProvider = Provider<AiQuizImportService>((ref) {
+  return AiQuizImportService(ref.watch(contenidoRepositoryProvider));
 });
 
 final facultadesProvider = StreamProvider.autoDispose<List<Facultade>>((ref) {

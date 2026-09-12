@@ -6,6 +6,7 @@ import '../../data/database/database.dart';
 import '../../logic/ai_prompt/prompt_generator_service.dart';
 import '../../logic/quiz_engine/quiz_models.dart';
 import '../providers/contenido_providers.dart';
+import 'ai_import_screen.dart';
 
 class PromptGeneratorScreen extends ConsumerStatefulWidget {
   const PromptGeneratorScreen({super.key});
@@ -256,6 +257,14 @@ class _PromptGeneratorScreenState extends ConsumerState<PromptGeneratorScreen> {
             onPressed: _prompt.isEmpty ? null : _copiarPrompt,
             icon: const Icon(Icons.copy_all_outlined),
             label: const Text('Copiar prompt'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AiImportScreen()),
+            ),
+            icon: const Icon(Icons.file_download_outlined),
+            label: const Text('Importar preguntas de IA'),
           ),
           const SizedBox(height: 16),
           Container(
