@@ -17,9 +17,15 @@ abstract class AppTheme {
         ? Typography.material2021().black
         : Typography.material2021().white;
     final textTheme = GoogleFonts.interTextTheme(baseTextTheme).copyWith(
+      displayMedium: GoogleFonts.manrope(
+        textStyle: baseTextTheme.displayMedium,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
+      ),
       displaySmall: GoogleFonts.manrope(
         textStyle: baseTextTheme.displaySmall,
         fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
       ),
       headlineSmall: GoogleFonts.manrope(
         textStyle: baseTextTheme.headlineSmall,
@@ -33,6 +39,10 @@ abstract class AppTheme {
         textStyle: baseTextTheme.titleMedium,
         fontWeight: FontWeight.w600,
       ),
+      labelLarge: GoogleFonts.inter(
+        textStyle: baseTextTheme.labelLarge,
+        fontWeight: FontWeight.w600,
+      ),
     );
 
     return ThemeData(
@@ -44,11 +54,12 @@ abstract class AppTheme {
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        scrolledUnderElevation: 1,
-        backgroundColor: colorScheme.surface,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
-        surfaceTintColor: colorScheme.surfaceTint,
+        surfaceTintColor: Colors.transparent,
         titleTextStyle: textTheme.titleLarge,
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -56,8 +67,13 @@ abstract class AppTheme {
         color: colorScheme.surfaceContainerHigh,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+            width: 1,
+          ),
         ),
+        clipBehavior: Clip.antiAlias,
       ),
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(
@@ -76,26 +92,25 @@ abstract class AppTheme {
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm + 4,
+            vertical: AppSpacing.sm + 6,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
-          textStyle: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          textStyle: textTheme.labelLarge,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm + 4,
+            vertical: AppSpacing.sm + 6,
           ),
           side: BorderSide(color: colorScheme.outlineVariant),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
+          textStyle: textTheme.labelLarge,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -106,17 +121,22 @@ abstract class AppTheme {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        elevation: 2,
+        elevation: 3,
+        highlightElevation: 5,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.sm),
           borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -128,6 +148,7 @@ abstract class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         titleTextStyle: textTheme.titleLarge,
+        backgroundColor: colorScheme.surfaceContainerHigh,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
@@ -138,7 +159,7 @@ abstract class AppTheme {
         contentTextStyle: TextStyle(color: colorScheme.onInverseSurface),
       ),
       dividerTheme: DividerThemeData(
-        color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         space: AppSpacing.xl,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
