@@ -35,7 +35,32 @@ class AppDatabase extends _$AppDatabase {
         onCreate: (Migrator m) async {
           await m.createAll();
         },
-        // A partir de aquí se agregan los onUpgrade cuando cambie el schema.
+        onUpgrade: (Migrator m, int from, int to) async {
+          // Mantener un historial explícito de migraciones por versión.
+          // El objetivo es evitar cambios de schema que reescriban la base sin
+          // migrar los datos existentes.
+          switch (from) {
+            case 1:
+              // Versión actual del esquema. Cuando llegue la primera migración
+              // real (por ejemplo, schemaVersion = 2), agregar aquí la lógica de
+              // upgrade explícita, por ejemplo:
+              // await m.addColumn(...);
+              // await m.createTable(...);
+              // Nunca hacer dropTable/createTable sin una migración de datos
+              // documentada y probada.
+              return;
+            default:
+              throw UnsupportedError(
+                'No hay una migración definida para $from -> $to',
+              );
+          }
+        },
+        beforeOpen: (details) async {
+          if (details.hadUpgrade) {
+            // Si en el futuro se dispara un upgrade, dejar este punto como
+            // checkpoint para validaciones y logging de migración.
+          }
+        },
       );
 }
 
