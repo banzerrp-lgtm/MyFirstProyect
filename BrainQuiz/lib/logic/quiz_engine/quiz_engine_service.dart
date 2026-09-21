@@ -62,6 +62,7 @@ class QuizEngineService {
         dificultades: filtro.dificultades,
         cantidadPreguntas: item.cantidad,
         tipo: filtro.tipo,
+        modo: filtro.modo,
       );
       final candidatas = await _repository.obtenerPreguntasCandidatas(
         subFiltro,
@@ -92,6 +93,7 @@ class QuizEngineService {
       tiempoLimiteSegundos: filtro.tiempoLimiteSegundos,
       tipo: filtro.tipo,
       distribucion: filtro.distribucion,
+      modo: filtro.modo,
     );
     seleccionadas.shuffle();
     return QuizSession(preguntas: seleccionadas, filtro: filtroFinal);

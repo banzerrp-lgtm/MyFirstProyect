@@ -46,6 +46,7 @@ class _SimulacroConfigDialogState
   final Set<String> _dificultades = {};
   bool _conTiempo = false;
   int _minutos = 30;
+  ModoQuiz _modo = ModoQuiz.realismo;
 
   _MateriaEstado _estadoDe(int id) =>
       _estado.putIfAbsent(id, _MateriaEstado.new);
@@ -70,6 +71,24 @@ class _SimulacroConfigDialogState
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SegmentedButton<ModoQuiz>(
+                      segments: const [
+                        ButtonSegment(
+                          value: ModoQuiz.practica,
+                          label: Text('Práctica'),
+                          icon: Icon(Icons.school_outlined),
+                        ),
+                        ButtonSegment(
+                          value: ModoQuiz.realismo,
+                          label: Text('Realismo'),
+                          icon: Icon(Icons.timer_outlined),
+                        ),
+                      ],
+                      selected: {_modo},
+                      onSelectionChanged: (seleccion) =>
+                          setState(() => _modo = seleccion.first),
+                    ),
+                    const SizedBox(height: 8),
                     const Text('Selecciona materias y cantidad de preguntas:'),
                     const SizedBox(height: 8),
                     Expanded(
@@ -105,31 +124,33 @@ class _SimulacroConfigDialogState
                           ),
                       ],
                     ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Con límite de tiempo'),
-                      value: _conTiempo,
-                      onChanged: (value) =>
-                          setState(() => _conTiempo = value),
-                    ),
-                    if (_conTiempo)
-                      Row(
-                        children: [
-                          const Text('Minutos:'),
-                          Expanded(
-                            child: Slider(
-                              value: _minutos.toDouble(),
-                              min: 5,
-                              max: 180,
-                              divisions: 35,
-                              label: '$_minutos',
-                              onChanged: (value) =>
-                                  setState(() => _minutos = value.round()),
-                            ),
-                          ),
-                          Text('$_minutos'),
-                        ],
+                    if (_modo == ModoQuiz.realismo) ...[
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Con límite de tiempo'),
+                        value: _conTiempo,
+                        onChanged: (value) =>
+                            setState(() => _conTiempo = value),
                       ),
+                      if (_conTiempo)
+                        Row(
+                          children: [
+                            const Text('Minutos:'),
+                            Expanded(
+                              child: Slider(
+                                value: _minutos.toDouble(),
+                                min: 5,
+                                max: 180,
+                                divisions: 35,
+                                label: '$_minutos',
+                                onChanged: (value) =>
+                                    setState(() => _minutos = value.round()),
+                              ),
+                            ),
+                            Text('$_minutos'),
+                          ],
+                        ),
+                    ],
                   ],
                 ),
         ),
@@ -312,9 +333,11 @@ class _SimulacroConfigDialogState
           0,
           (total, item) => total + item.cantidad,
         ),
-        tiempoLimiteSegundos: _conTiempo ? _minutos * 60 : null,
+        tiempoLimiteSegundos:
+            _modo == ModoQuiz.realismo && _conTiempo ? _minutos * 60 : null,
         tipo: 'simulacro',
         distribucion: distribucion,
+        modo: _modo,
       ),
     );
   }

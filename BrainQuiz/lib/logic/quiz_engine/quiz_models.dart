@@ -25,6 +25,8 @@ class DistribucionItem {
       );
 }
 
+enum ModoQuiz { practica, realismo }
+
 class QuizFiltro {
   final int? facultadId;
   final int? materiaId;
@@ -34,6 +36,7 @@ class QuizFiltro {
   final int? tiempoLimiteSegundos;
   final String tipo;
   final List<DistribucionItem> distribucion;
+  final ModoQuiz modo;
 
   const QuizFiltro({
     this.facultadId,
@@ -44,6 +47,7 @@ class QuizFiltro {
     this.tiempoLimiteSegundos,
     required this.tipo,
     this.distribucion = const [],
+    this.modo = ModoQuiz.realismo,
   });
 
   bool get tieneDistribucion => distribucion.isNotEmpty;
@@ -56,6 +60,7 @@ class QuizFiltro {
     'cantidadPreguntas': cantidadPreguntas,
     'tiempoLimiteSegundos': tiempoLimiteSegundos,
     'tipo': tipo,
+    'modo': modo.name,
     'distribucion': distribucion.map((item) => item.toJson()).toList(),
   };
 }

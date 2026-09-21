@@ -42,8 +42,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   void _onTick() {
     if (!mounted) return;
     if (widget.filtro.tiempoLimiteSegundos != null) {
-      final restante = widget.filtro.tiempoLimiteSegundos! -
-          _cronometro.elapsed.inSeconds;
+      final restante =
+          widget.filtro.tiempoLimiteSegundos! - _cronometro.elapsed.inSeconds;
       setState(() => _segundosRestantes = restante.clamp(0, 359999));
       if (_segundosRestantes <= 0) {
         _finalizar();
@@ -158,6 +158,30 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
 
     final pregunta = estado.pregunta;
+    final esPractica = widget.filtro.modo == ModoQuiz.practica;
+    final respuesta = estado.respuestaActual;
+    final bloqueada = esPractica && respuesta != null;
+    OpcionModel? correcta;
+    for (final opcion in pregunta.opciones) {
+      if (opcion.esCorrecta) {
+        correcta = opcion;
+        break;
+      }
+    }
+
+    Color? colorOpcion(OpcionModel opcion) {
+      if (bloqueada) {
+        if (opcion.esCorrecta) return Colors.green.withAlpha(70);
+        if (opcion.id == respuesta.opcionElegidaId) {
+          return Colors.red.withAlpha(70);
+        }
+        return null;
+      }
+      return opcion.id == respuesta?.opcionElegidaId
+          ? Theme.of(context).colorScheme.primaryContainer
+          : null;
+    }
+
     final tiempoLimite = widget.filtro.tiempoLimiteSegundos != null;
     final tiempoMostrado = tiempoLimite
         ? _segundosRestantes
@@ -234,9 +258,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     ),
                     const SizedBox(height: 16),
                     RadioGroup<int>(
-                      groupValue: estado.respuestaActual?.opcionElegidaId,
+                      groupValue: respuesta?.opcionElegidaId,
                       onChanged: (valor) {
-                        if (valor != null) {
+                        if (valor != null && !bloqueada) {
                           ref
                               .read(quizSessionProvider.notifier)
                               .responder(valor);
@@ -244,13 +268,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       },
                       child: Column(
                         children: pregunta.opciones.map((opcion) {
-                          final seleccionada =
-                              estado.respuestaActual?.opcionElegidaId ==
-                              opcion.id;
                           return Card(
-                            color: seleccionada
-                                ? Theme.of(context).colorScheme.primaryContainer
-                                : null,
+                            color: colorOpcion(opcion),
                             child: RadioListTile<int>(
                               title: Text(opcion.texto),
                               value: opcion.id,
@@ -259,6 +278,43 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         }).toList(),
                       ),
                     ),
+                    if (bloqueada) ...[
+                      const SizedBox(height: 12),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                respuesta.esCorrecta
+                                    ? '¡Correcto!'
+                                    : 'Incorrecto',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: respuesta.esCorrecta
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ),
+                              if (!respuesta.esCorrecta) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Respuesta correcta: '
+                                  '${correcta?.texto ?? 'No definida'}',
+                                ),
+                              ],
+                              if (pregunta.explicacion?.trim().isNotEmpty ==
+                                  true) ...[
+                                const SizedBox(height: 8),
+                                Text('Explicación: ${pregunta.explicacion}'),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -16,6 +16,7 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
   var cantidad = maximo < 10 ? maximo : 10;
   var conTiempo = false;
   var minutos = 15;
+  var modo = ModoQuiz.practica;
   final dificultades = <String>{};
 
   return showDialog<QuizFiltro>(
@@ -27,6 +28,24 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SegmentedButton<ModoQuiz>(
+              segments: const [
+                ButtonSegment(
+                  value: ModoQuiz.practica,
+                  label: Text('Práctica'),
+                  icon: Icon(Icons.school_outlined),
+                ),
+                ButtonSegment(
+                  value: ModoQuiz.realismo,
+                  label: Text('Realismo'),
+                  icon: Icon(Icons.timer_outlined),
+                ),
+              ],
+              selected: {modo},
+              onSelectionChanged: (seleccion) =>
+                  setState(() => modo = seleccion.first),
+            ),
+            const SizedBox(height: 12),
             Text('Cantidad de preguntas (máx. $maximo):'),
             Slider(
               value: cantidad.toDouble(),
@@ -62,30 +81,32 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
               ],
             ),
             const SizedBox(height: 12),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Con límite de tiempo'),
-              value: conTiempo,
-              onChanged: (valor) => setState(() => conTiempo = valor),
-            ),
-            if (conTiempo)
-              Row(
-                children: [
-                  const Text('Minutos:'),
-                  Expanded(
-                    child: Slider(
-                      value: minutos.toDouble(),
-                      min: 1,
-                      max: 60,
-                      divisions: 59,
-                      label: '$minutos',
-                      onChanged: (valor) =>
-                          setState(() => minutos = valor.round()),
-                    ),
-                  ),
-                  Text('$minutos'),
-                ],
+            if (modo == ModoQuiz.realismo) ...[
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Con límite de tiempo'),
+                value: conTiempo,
+                onChanged: (valor) => setState(() => conTiempo = valor),
               ),
+              if (conTiempo)
+                Row(
+                  children: [
+                    const Text('Minutos:'),
+                    Expanded(
+                      child: Slider(
+                        value: minutos.toDouble(),
+                        min: 1,
+                        max: 60,
+                        divisions: 59,
+                        label: '$minutos',
+                        onChanged: (valor) =>
+                            setState(() => minutos = valor.round()),
+                      ),
+                    ),
+                    Text('$minutos'),
+                  ],
+                ),
+            ],
           ],
         ),
         actions: [
@@ -101,8 +122,10 @@ Future<QuizFiltro?> mostrarConfiguracionQuizDialog(
                 facultadId: facultadId,
                 dificultades: dificultades,
                 cantidadPreguntas: cantidad,
-                tiempoLimiteSegundos: conTiempo ? minutos * 60 : null,
+                tiempoLimiteSegundos:
+                    modo == ModoQuiz.realismo && conTiempo ? minutos * 60 : null,
                 tipo: tipo,
+                modo: modo,
               ),
             ),
             child: const Text('Empezar'),
