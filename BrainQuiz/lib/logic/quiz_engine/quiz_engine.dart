@@ -10,9 +10,7 @@ class QuizSession {
     required List<PreguntaConOpciones> preguntas,
     required this.filtro,
     Random? random,
-  }) : preguntas = List.unmodifiable(
-         List<PreguntaConOpciones>.from(preguntas)..shuffle(random ?? Random()),
-       ),
+  }) : preguntas = _prepararPreguntas(preguntas, random ?? Random()),
        _respuestas = {},
        _pendientes = {};
 
@@ -23,6 +21,35 @@ class QuizSession {
   final Map<int, RespuestaRegistrada> _respuestas;
   final Set<int> _pendientes;
   EstadoSesion estado = EstadoSesion.enCurso;
+
+  static List<PreguntaConOpciones> _prepararPreguntas(
+    List<PreguntaConOpciones> preguntas,
+    Random random,
+  ) {
+    final lista =
+        preguntas.map((pregunta) => _mezclarOpciones(pregunta, random)).toList()
+          ..shuffle(random);
+    return List.unmodifiable(lista);
+  }
+
+  static PreguntaConOpciones _mezclarOpciones(
+    PreguntaConOpciones pregunta,
+    Random random,
+  ) {
+    final opcionesMezcladas = List<OpcionModel>.from(pregunta.opciones)
+      ..shuffle(random);
+    return PreguntaConOpciones(
+      id: pregunta.id,
+      temaId: pregunta.temaId,
+      materiaId: pregunta.materiaId,
+      temaNombre: pregunta.temaNombre,
+      materiaNombre: pregunta.materiaNombre,
+      enunciado: pregunta.enunciado,
+      explicacion: pregunta.explicacion,
+      dificultad: pregunta.dificultad,
+      opciones: opcionesMezcladas,
+    );
+  }
 
   int get indiceActual => _indiceActual;
   int get total => preguntas.length;
